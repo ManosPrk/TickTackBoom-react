@@ -16,7 +16,7 @@ function App() {
     return (
         <div className="container-fluid">
             <CookiesProvider />
-            <ToastContainer newestOnTop autoClose={3000} hideProgressBar />
+            <ToastContainer newestOnTop autoClose={2000} hideProgressBar />
             <Switch>
                 <Route path="/" exact component={MainMenu} />
                 <Route path="/players" exact component={PlayerForm} />
