@@ -1,8 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
 import Bomb from "./Bomb";
-import NavButton from "./common/NavButton";
-import Game from "./Game";
+import { NavLink } from "react-router-dom";
 
 function MainMenu() {
 
@@ -11,8 +9,12 @@ function MainMenu() {
             <Bomb></Bomb>
             <div>
                 <nav className="d-flex flex-column col-md-12">
-                    <NavButton link={'/game'} text={'New Game'}></NavButton>
-                    <NavButton link={'/'} text={'Settings'}></NavButton>
+                    <h1>
+                        <NavLink className="nav-button" id="nav-button" to="/game">New Game</NavLink>
+                    </h1>
+                    <h1>
+                        <NavLink className="nav-button" to="/players">Set players</NavLink>
+                    </h1>
                 </nav>
             </div>
         </div>

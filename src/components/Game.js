@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Bomb from "./Bomb";
 import Dice from "./Dice";
 import Card from "./Card";
-import NavButton from './common/NavButton';
 import GameState from './GameState';
-import { Player } from './Player';
 import LoserModal from './common/LoserModal';
+import { NavLink } from 'react-router-dom';
+import ResultsModal from './common/ResultsModal';
 
 
-function Game() {
+
+function Game(props) {
     const {
         cards,
         currentCard,
@@ -16,27 +17,37 @@ function Game() {
         handleCardClick,
         handleDiceClick,
         handleBombClick,
-        showModal,
-        hideModal,
-        players
+        showLoserModal,
+        hideLoserModal,
+        players,
+        showResultsModal,
+        hideResultsModal,
+        resetGame,
+        gameOver
     } = GameState();
-    // const dice
-    // const bomb
-    // const standings
+
+    useEffect(() => {
+        if (!players) {
+            props.history.push('/');
+            console.log('yo');
+        }
+    }, [players, props.history]);
+
+
 
     return (
         <div className="game-container">
-            <NavButton link={'/'} text="Menu"></NavButton>
-            <LoserModal show={showModal} close={hideModal} players={players}></LoserModal>
-            <div className="d-flex flex-column align-items-center">
-                <Bomb onClick={handleBombClick}></Bomb>
-            </div>
+            <NavLink to="/">Menu</NavLink>
+            <LoserModal show={showLoserModal} close={hideLoserModal} players={[...players]}></LoserModal>
+            {/* {cards.length === 0 && <ResultsModal show={showResultsModal} close={hideResultsModal} players={[...players]} />} */}
+            {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
+            <Bomb onClick={handleBombClick}></Bomb>
             <span>Remaining syllables: {cards.length} </span>
             <div className="game-items-container">
                 <Dice text={currentDiceSide} onClick={handleDiceClick}></Dice>
                 <Card text={currentCard} onClick={handleCardClick}></Card>
             </div>
-        </div>
+        </div >
     );
 }
 

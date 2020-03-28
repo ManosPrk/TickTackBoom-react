@@ -2,8 +2,8 @@ import React from 'react';
 
 function Card(props) {
     return (
-        <div className="syllable-card">
-            <span onClick={props.onClick} id="syllable" className="noselect">{props.text}</span>
+        <div onClick={props.onClick} className="syllable-card">
+            <span id="syllable" className="noselect">{props.text}</span>
         </div>
     );
 }

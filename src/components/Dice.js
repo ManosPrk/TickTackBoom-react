@@ -3,8 +3,8 @@ import React from "react";
 
 function Dice(props) {
     return (
-        <div className="dice">
-            <span onClick={props.onClick} id="side" className="noselect">{props.text}</span>
+        <div onClick={props.onClick} className="dice">
+            <span id="side" className="noselect">{props.text}</span>
         </div>
     );
 }

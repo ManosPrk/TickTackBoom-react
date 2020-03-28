@@ -1,41 +1,47 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
+import { NavLink } from "react-router-dom";
+// import NavButton from './NavButton';
 
-function LoserModal(props) {
-    // const handleShow = () => setShow(true);\
+function ResultsModal(props) {
+    const players = [...props.players].sort((player1, player2) => player2.roundsLost - player1.roundsLost);
+
     return (
         <Modal
             show={props.show}
             aria-labelledby="contained-modal-title-vcenter"
             centered
-            onHide={() => { }}
+            onHide={props.close}
         >
             <Modal.Header className='bg-warning justify-content-center'>
-                <Modal.Title>BOOM! Who lost? </Modal.Title>
+                <Modal.Title>{players[0].name} Lost! </Modal.Title>
             </Modal.Header>
             <div id="loser-list-group">
-                <Modal.Body >
+                <Modal.Body>
                     <ul className="list-group text-center">
-                        {props.players
+                        {players
+                            .slice(1)
                             .map((player) => {
                                 return (
                                     <li
-                                        onClick={props.close}
+                                        style={{ border: 'none' }}
                                         value={player.id}
                                         key={player.id}
                                         className="list-group-item noselect"
                                     >
-                                        {player.name}, rounds lost: {player.roundsLost}.
+                                        {player.name} lost {player.roundsLost} round(s).
                                     </li>
                                 );
                             })}
                     </ul>
                 </Modal.Body>
+                <button className="btn btn-primary float-right" onClick={props.close}>New Game</button>
+                <NavLink className="btn btn-primary" onClick={props.close} to="/">Main Menu</NavLink>
             </div>
 
         </Modal>
     );
 }
 
-export default LoserModal;
+export default ResultsModal;
 

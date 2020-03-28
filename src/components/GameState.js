@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { getCards, getDiceSide, getRandomSecs } from "../Utilities"
-import { Player } from './Player';
+import { useState, useEffect } from 'react';
+import { getCards, getDiceSide } from "../Utilities"
+import { toast } from "react-toastify";
+// import { getPlayers } from './api/playerApi'
+import { useCookies } from 'react-cookie';
 
 function GameState(props) {
-    const [cards, setCards] = useState(getCards());
+    const [cards, setCards] = useState(getCards().slice(0, 2));
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
     const [roundStarted, setRoundStarted] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [showLoserModal, setShowLoserModal] = useState(false);
+    const [showResultsModal, setShowResultsModal] = useState(false);
     const tickAudio = new Audio('/tick.mp3');
     const boomAudio = new Audio('/boom.mp3');
-    const players = [
-        new Player('Manos'),
-        new Player('Takis'),
-        new Player('Soula')
-    ];
+    const [cookies, setCookie] = useCookies([]);
+    const [gameOver, setGameover] = useState(false);
 
     function handleCardClick() {
         if (currentCard !== 'DRAW') {
-            alert('You cant draw more than one card');
+            toast.error('You already drew a card')
             return;
         }
         const newCardSet = cards;
@@ -28,38 +28,55 @@ function GameState(props) {
 
     function handleDiceClick() {
         if (currentDiceSide !== 'ROLL') {
-            alert('You cant roll the dice more than once');
+            toast.error('You have already rolled the dice')
             return;
         }
-        setCurrentDiceSide(getDiceSide());
+        const randomSide = getDiceSide();
+        setCurrentDiceSide(randomSide);
     }
 
-
     function handleBombClick() {
-        if (!currentCard && !currentDiceSide) {
-            alert('not set');
+        if (currentDiceSide === 'ROLL'
+            && currentCard === 'DRAW') {
+            toast.error('Please draw a card and roll the dice')
             return;
         }
         if (roundStarted) {
-            alert('round started');
             return;
         }
         startTimer(1);
         setRoundStarted(true);
     }
 
-    function hideModal(event) {
-        players[event.target.value].roundsLost++;
-        setShowModal(false);
-        setCurrentCard('DRAW');
-        setCurrentDiceSide('ROLL')
+    function hideLoserModal(event) {
+        event.preventDefault();
+        cookies.players[event.target.value].roundsLost++;
+        setShowLoserModal(false);
+        if (cards.length === 0) {
+            setShowResultsModal(true);
+            setGameover(true);
+        }
+        setCookie('players', cookies.players);
+    }
+
+    function hideResultsModal(event) {
+        setShowResultsModal(false);
+        resetGame();
     }
 
     function resetState() {
         setRoundStarted(false);
+        setCurrentCard('DRAW');
+        setCurrentDiceSide('ROLL')
     }
 
-    function startTimer(randomExplodingTime = 5) {
+    function resetGame() {
+        setGameover(false);
+        setCards(getCards().slice(0, 2));
+        setCookie('players', cookies.players.forEach((player) => { player.roundsLost = 0 }));
+    }
+
+    function startTimer(randomExplodingTime = Math.floor(Math.random() * (40 - 10) + 10)) {
         tickAudio.loop = true;
 
 
@@ -68,7 +85,7 @@ function GameState(props) {
                 setTimeout(() => {
                     tickAudio.pause();
                     boomAudio.play();
-                    setShowModal(true);
+                    setShowLoserModal(true);
                     resetState();
                 }, randomExplodingTime * 1000);
             })
@@ -80,7 +97,6 @@ function GameState(props) {
     //     setCurrentDiceSide('boom')
 
     // }
-
     return {
         cards,
         currentCard,
@@ -88,9 +104,13 @@ function GameState(props) {
         handleCardClick,
         handleDiceClick,
         handleBombClick,
-        showModal,
-        hideModal,
-        players
+        showLoserModal,
+        hideLoserModal,
+        players: cookies.players,
+        showResultsModal,
+        hideResultsModal,
+        resetGame,
+        gameOver
     };
 }
 

@@ -3,7 +3,9 @@ import bombImage from "../assets/bomb.png"
 
 function Bomb(props) {
     return (
-        <img onClick={props.onClick} className="img-fluid" src={bombImage} alt="bomb"></img>
+        <div className="d-flex flex-column align-items-center">
+            <img onClick={props.onClick} className="img-fluid" src={bombImage} alt="bomb"></img>
+        </div>
     );
 }
 
