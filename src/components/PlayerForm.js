@@ -11,10 +11,6 @@ import { toast } from "react-toastify";
 function PlayerForm(props) {
     const [players, setPlayers] = useState([]);
     const [cookies, setCookie, removeCookies] = useCookies(['players']);
-    // const [player, setPlayer] = useState({
-    //     name: '',
-    //     id: null,
-    // })
 
     function handleBlur(event) {
         const { target } = event;
