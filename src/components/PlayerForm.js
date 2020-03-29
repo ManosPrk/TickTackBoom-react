@@ -1,21 +1,21 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import { savePlayer } from './api/playerApi'
 import TextInput from "./common/TextInput";
 // import { toast } from "react-toastify";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import playerStore from "../store/playerStore"
 // import TextInput from "./common/TextInput";
-
+import { savePlayer } from "../actions/playerActions";
 
 function PlayerForm(props) {
     const [players, setPlayers] = useState([]);
-    const [cookies, setCookie, removeCookies] = useCookies(['players']);
 
     function handleBlur(event) {
         const { target } = event;
         const newPlayers = players;
-        newPlayers[target.id] = { id: newPlayers.length, name: target.value, roundsLost: 0 };
+        newPlayers[target.id] = { id: null, name: target.value, roundsLost: 0 };
         setPlayers(newPlayers)
     }
 
@@ -27,7 +27,7 @@ function PlayerForm(props) {
             toast.error('Please insert at least 4 players!');
             return;
         }
-        setCookie('players', playersToInsert);
+        playersToInsert.forEach((player) => savePlayer(player));
         /// Save to API
         // console.log(playersToInsert);
         // if (playersToInsert.length > 0) {

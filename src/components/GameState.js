@@ -3,6 +3,8 @@ import { getCards, getDiceSide } from "../Utilities"
 import { toast } from "react-toastify";
 // import { getPlayers } from './api/playerApi'
 import { useCookies } from 'react-cookie';
+import { loadPlayers } from '../actions/playerActions';
+import playerStore from "../store/playerStore";
 
 function GameState(props) {
     const [cards, setCards] = useState(getCards().slice(0, 2));
@@ -13,8 +15,15 @@ function GameState(props) {
     const [showResultsModal, setShowResultsModal] = useState(false);
     const tickAudio = new Audio('/tick.mp3');
     const boomAudio = new Audio('/boom.mp3');
-    const [cookies, setCookie] = useCookies([]);
+    // const [cookies, setCookie] = useCookies([]);
+    const players = playerStore.getPlayers();
     const [gameOver, setGameover] = useState(false);
+
+    useEffect(() => {
+        if (players.length === 0) {
+            loadPlayers();
+        }
+    })
 
     function handleCardClick() {
         if (currentCard !== 'DRAW') {
@@ -50,13 +59,12 @@ function GameState(props) {
 
     function hideLoserModal(event) {
         event.preventDefault();
-        cookies.players[event.target.value].roundsLost++;
+        players[event.target.value].roundsLost++;
         setShowLoserModal(false);
         if (cards.length === 0) {
             setShowResultsModal(true);
             setGameover(true);
         }
-        setCookie('players', cookies.players);
     }
 
     function hideResultsModal(event) {
@@ -73,7 +81,7 @@ function GameState(props) {
     function resetGame() {
         setGameover(false);
         setCards(getCards().slice(0, 2));
-        setCookie('players', cookies.players.forEach((player) => { player.roundsLost = 0 }));
+        players.forEach((player) => { player.roundsLost = 0 });
     }
 
     function startTimer(randomExplodingTime = Math.floor(Math.random() * (40 - 10) + 10)) {
@@ -106,7 +114,7 @@ function GameState(props) {
         handleBombClick,
         showLoserModal,
         hideLoserModal,
-        players: cookies.players,
+        players,
         showResultsModal,
         hideResultsModal,
         resetGame,

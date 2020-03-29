@@ -3,6 +3,7 @@ import Dispatcher from "../appDispatcher";
 import actionTypes from "../actions/actionTypes";
 const CHANGE_EVENT = "change";
 let _players = [];
+
 class PlayerStore extends EventEmitter {
     addChangeListener(callback) {
         this.on(CHANGE_EVENT, callback);

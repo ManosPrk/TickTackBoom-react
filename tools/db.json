@@ -2,28 +2,27 @@
   "Players": [
     {
       "id": 1,
-      "name": "dddd",
-      "createdAt": 1585063210917
+      "name": "koula",
+      "roundsLost": 0,
+      "createdAt": 1585480355063
     },
     {
-      "name": "dddd",
-      "createdAt": 1585063327578,
-      "id": 2
+      "id": 2,
+      "name": "manos",
+      "roundsLost": 0,
+      "createdAt": 1585480355067
     },
     {
-      "name": "yiota",
       "id": 3,
-      "createdAt": 1585063413037
+      "name": "soula",
+      "roundsLost": 0,
+      "createdAt": 1585480355082
     },
     {
       "id": 4,
-      "name": "soula",
-      "createdAt": 1585063499944
-    },
-    {
-      "id": 5,
-      "name": "koula",
-      "createdAt": 1585063499962
+      "name": "yiota",
+      "roundsLost": 0,
+      "createdAt": 1585480355084
     }
   ]
 }
