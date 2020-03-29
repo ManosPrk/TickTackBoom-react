@@ -11,7 +11,7 @@ function ResultsModal(props) {
             show={props.show}
             aria-labelledby="contained-modal-title-vcenter"
             centered
-            onHide={props.close}
+            onHide={() => { }}
         >
             <Modal.Header className='bg-warning justify-content-center'>
                 <Modal.Title>{players[0].name} Lost! </Modal.Title>
