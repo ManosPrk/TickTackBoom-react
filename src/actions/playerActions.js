@@ -1,6 +1,6 @@
 import dispatcher from "../appDispatcher";
 import actionTypes from "./actionTypes";
-import playerApi from "../api/playerApi";
+import * as playerApi from "../api/playerApi";
 
 export function savePlayer(player) {
     return playerApi.savePlayer(player).then(savedPlayer => {
@@ -12,7 +12,6 @@ export function savePlayer(player) {
         });
     });
 }
-
 
 export function loadPlayers() {
     return playerApi.getPlayers().then(players => {
