@@ -11,7 +11,6 @@ import TextInput from './common/TextInput';
 import { CookiesProvider, useCookies } from "react-cookie"
 
 function App() {
-    const [cookies] = useCookies(['players']);
 
     return (
         <div className="container-fluid">
@@ -20,8 +19,7 @@ function App() {
             <Switch>
                 <Route path="/" exact component={MainMenu} />
                 <Route path="/players" exact component={PlayerForm} />
-                {cookies.players.length > 4 && <Route path="/game" exact component={Game} />}
-                {!cookies.players && <Redirect to="/" />}
+                <Route path="/game" exact component={Game} />
                 <Route path="/inputs" exact component={TextInput} />
             </Switch>
         </div>
