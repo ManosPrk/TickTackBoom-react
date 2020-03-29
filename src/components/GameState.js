@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { getCards, getDiceSide } from "../Utilities"
 import { toast } from "react-toastify";
 // import { getPlayers } from './api/playerApi'
-import { useCookies } from 'react-cookie';
 import { loadPlayers } from '../actions/playerActions';
 import playerStore from "../store/playerStore";
 
@@ -59,7 +58,7 @@ function GameState(props) {
 
     function hideLoserModal(event) {
         event.preventDefault();
-        players[event.target.value].roundsLost++;
+        players.find((player) => player.id === event.target.value).roundsLost++;
         setShowLoserModal(false);
         if (cards.length === 0) {
             setShowResultsModal(true);
