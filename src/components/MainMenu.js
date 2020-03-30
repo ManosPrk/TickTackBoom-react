@@ -10,10 +10,7 @@ function MainMenu() {
             <div>
                 <nav className="d-flex flex-column col-md-12">
                     <h1>
-                        <NavLink className="nav-button" id="nav-button" to="/game">New Game</NavLink>
-                    </h1>
-                    <h1>
-                        <NavLink className="nav-button" to="/players">Set players</NavLink>
+                        <NavLink className="nav-button" id="nav-button" to="/players">New Game</NavLink>
                     </h1>
                 </nav>
             </div>
