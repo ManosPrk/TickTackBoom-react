@@ -4,11 +4,10 @@ import TextInput from "./common/TextInput";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import playerStore from "../store/playerStore";
-import { savePlayer } from "../actions/playerActions";
+import { savePlayer, loadPlayers } from "../actions/playerActions";
 
 function PlayerForm(props) {
     const [players, setPlayers] = useState([]);
-
 
     function handleBlur(event) {
         const { target } = event;
@@ -20,7 +19,7 @@ function PlayerForm(props) {
 
     function handleSubmit(event) {
         event.preventDefault();
-        const playersToInsert = players.filter((player) => player !== '' && typeof String);
+        const playersToInsert = players.filter((player) => player !== '');
         if (playersToInsert.length < 4) {
             toast.error('Please insert at least 4 players!');
             return;
