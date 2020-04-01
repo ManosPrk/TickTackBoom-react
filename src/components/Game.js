@@ -1,61 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Bomb from "./Bomb";
 import Dice from "./Dice";
 import Card from "./Card";
-import { getCards, getDiceSide } from "../Utilities"
+import { getCards, getDiceSide, getRandomSecs } from "../Utilities"
 import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
+import PropTypes from 'prop-types'
 
 
 function Game(props) {
     const [cards, setCards] = useState(getCards().slice(0, 2));
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
+    const [isDiceRolled, setIsDiceRolled] = useState(false);
+    const [isCardDrawn, setIsCardDrawn] = useState(false);
     const [roundStarted, setRoundStarted] = useState(false);
     const [showLoserModal, setShowLoserModal] = useState(false);
     const [showResultsModal, setShowResultsModal] = useState(false);
+    const [gameOver, setGameover] = useState(false);
     const tickAudio = new Audio('/tick.mp3');
     const boomAudio = new Audio('/boom.mp3');
-    // const [cookies, setCookie] = useCookies([]);
     const players = props.players;
-    const [gameOver, setGameover] = useState(false);
 
     if (players.length === 0) {
         props.history.push('/');
     }
 
     function handleCardClick() {
-        if (currentCard !== 'DRAW') {
+        if (isCardDrawn) {
             toast.error('You already drew a card')
             return;
         }
         const newCardSet = cards;
         setCurrentCard(newCardSet.shift());
+        setIsCardDrawn(true);
         setCards(newCardSet);
     }
 
     function handleDiceClick() {
-        if (currentDiceSide !== 'ROLL') {
+        if (isDiceRolled) {
             toast.error('You have already rolled the dice')
             return;
         }
         const randomSide = getDiceSide();
+        setIsDiceRolled(true);
         setCurrentDiceSide(randomSide);
     }
 
     function handleBombClick() {
-        if (currentDiceSide === 'ROLL'
-            && currentCard === 'DRAW') {
-            toast.error('Please draw a card and roll the dice')
+        const cardError = `${!isCardDrawn ? `draw a card` : ''}`;
+        const diceError = `${!isDiceRolled ? 'roll the dice' : ''}`;
+        if (!isDiceRolled || !isCardDrawn) {
+            toast.error(`Please ${diceError}${!isDiceRolled && !isCardDrawn ? ' and ' : ''}${cardError}.`)
             return;
         }
         if (roundStarted) {
             return;
         }
-        startTimer(1);
-        setRoundStarted(true);
+        startTimer();
     }
 
     function hideLoserModal(event) {
@@ -75,8 +79,8 @@ function Game(props) {
 
     function resetState() {
         setRoundStarted(false);
-        setCurrentCard('DRAW');
-        setCurrentDiceSide('ROLL')
+        setIsCardDrawn(false);
+        setIsDiceRolled(false);
     }
 
     function resetGame() {
@@ -85,19 +89,16 @@ function Game(props) {
         players.forEach((player) => { player.roundsLost = 0 });
     }
 
-    function startTimer(randomExplodingTime = Math.floor(Math.random() * (40 - 10) + 10)) {
+    function startTimer(randomExplodingTime = getRandomSecs()) {
+        setRoundStarted(true);
         tickAudio.loop = true;
-
-
-        new Promise((res, rej) => {
-            tickAudio.play().then(() => {
-                setTimeout(() => {
-                    tickAudio.pause();
-                    boomAudio.play();
-                    setShowLoserModal(true);
-                    resetState();
-                }, randomExplodingTime * 1000);
-            })
+        tickAudio.play().then(() => {
+            setTimeout(() => {
+                tickAudio.pause();
+                boomAudio.play();
+                setShowLoserModal(true);
+                resetState();
+            }, randomExplodingTime * 1000);
         })
     }
 
@@ -116,6 +117,10 @@ function Game(props) {
             </div>
         </div >
     );
+}
+
+Game.propTypes = {
+    players: PropTypes.array.isRequired
 }
 
 export default Game; 
