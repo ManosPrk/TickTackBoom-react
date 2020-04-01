@@ -5,11 +5,13 @@ import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import playerStore from "../store/playerStore";
 import { savePlayer, loadPlayers } from "../actions/playerActions";
+import PropTypes from 'prop-types';
 
 function PlayerForm(props) {
     function onSubmit(event) {
-        props.handleSubmit(event);
-        props.history.push('/game');
+        if (props.handleSubmit(event)) {
+            props.history.push('/game');
+        }
     }
     return (
         <form onKeyPress={(event) => event.key === 'Enter' ? event.preventDefault() : null} onSubmit={onSubmit} id="player-container">
@@ -18,6 +20,10 @@ function PlayerForm(props) {
             <input type="submit" className="btn btn-primary" value="Start Game" />
         </form>
     );
+}
+
+PlayerForm.propTypes = {
+    handleSubmit: PropTypes.func.isRequired
 }
 
 export default PlayerForm;
