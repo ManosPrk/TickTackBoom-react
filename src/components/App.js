@@ -13,9 +13,10 @@ function App(props) {
     const [players, setPlayers] = useState([]);
 
     function handleBlur(event) {
+        event.preventDefault();
         const { target } = event;
         const newPlayers = players;
-        newPlayers[target.id] = { id: props.length, name: target.value, roundsLost: 0 };
+        newPlayers[target.id] = { id: target.id, name: target.value, roundsLost: 0 };
         setPlayers(newPlayers);
     }
 
@@ -25,8 +26,9 @@ function App(props) {
         const playersToInsert = players.filter((player) => player !== '');
         if (playersToInsert.length < 4) {
             toast.error('Please insert at least 4 players!');
-            return;
+            return false;
         }
+        return true;
     }
 
     return (
