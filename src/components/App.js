@@ -8,9 +8,13 @@ import Game from './Game';
 import { ToastContainer, toast } from 'react-toastify';
 import PlayerForm from './PlayerForm';
 import TextInput from './common/TextInput';
+import { socketPlayers } from '../socket_helper/playerSocket'
 
 function App(props) {
-    const [players, setPlayers] = useState([]);
+    socketPlayers((players) => console.log(players));
+    const [players, setPlayers] = useState([
+
+    ]);
 
     function handleBlur(event) {
         event.preventDefault();
