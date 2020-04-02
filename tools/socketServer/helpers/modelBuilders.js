@@ -2,17 +2,17 @@ const GameInstance = require('../models/GameInstance');
 const Player = require('../models/Player');
 
 module.exports = function Builders() {
-    function buildGameInstance(id, players) {
-        if (!id || !players) {
+    function buildGameInstance(id, playersId) {
+        if (!id || !playersId) {
             return {
                 error:
                 {
-                    message: `Could not build instance, missing value(s): ${!id ? 'id' : ''} ${!players ? 'players' : ''}`,
+                    message: `Could not build instance, missing value(s): ${!id ? 'id' : ''} ${!playersId ? 'players' : ''}`,
                 }
             }
         }
 
-        return new GameInstance(id, players);
+        return new GameInstance(id, playersId);
     }
 
     function buildPlayer(id, name, roundsLost = 0, isLeader = false) {

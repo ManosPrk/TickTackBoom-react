@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { Route, Switch } from "react-router-dom";
+import React from 'react';
+import { Route, Switch, Redirect } from "react-router-dom";
 // import { ToastContainer } from "react-toastify";
 import "../css/main.css"
 import "react-toastify/dist/ReactToastify.css";
 import MainMenu from './MainMenu';
 import Game from './Game';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import PlayerForm from './PlayerForm';
 import TextInput from './common/TextInput';
 
 function App(props) {
+
 
     return (
         <div className="container-fluid">
@@ -20,8 +21,9 @@ function App(props) {
                     path="/players" exact component={PlayerForm}
                 />
                 <Route
-                    path="/game" exact component={Game}
+                    path="/game/:id" exact component={Game}
                 />
+                <Redirect from="/game" to="/" />
                 <Route path="/inputs" exact component={TextInput} />
             </Switch>
         </div>

@@ -7,11 +7,12 @@ import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { getSocketPlayers } from '../socket_helper/playerSocket';
+import { getSocketPlayers, isInstanceValid } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
 
 function Game(props) {
     const [cards, setCards] = useState(getCards().slice(0, 2));
+    const gameId = props.match.params.id;
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
     const [isDiceRolled, setIsDiceRolled] = useState(false);
@@ -27,13 +28,20 @@ function Game(props) {
 
     useEffect(() => {
         let mounted = true;
+
+        isInstanceValid(gameId).then((isValid) => {
+            if (!isValid) {
+                props.history.push('/');
+            }
+        });
+
         getSocketPlayers((_players) => {
             if (mounted) {
                 setPlayers(_players);
             }
         });
         return () => mounted = false;
-    }, [])
+    }, [gameId, props.history])
 
     // if (players.length === 0) {
     //     props.history.push('/players');
@@ -76,7 +84,7 @@ function Game(props) {
 
     function hideLoserModal(event) {
         event.preventDefault();
-        players.find((player) => player.id === event.target.value).roundsLost++;
+        players[event.target.value].roundsLost++;
         setShowLoserModal(false);
         if (cards.length === 0) {
             setShowResultsModal(true);

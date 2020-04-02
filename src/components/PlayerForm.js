@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import TextInput from "./common/TextInput";
 import { toast } from "react-toastify";
-import { socketPlayers } from "../socket_helper/playerSocket";
+import { createGameInstance } from "../socket_helper/playerSocket";
 
 function PlayerForm(props) {
     const [players, setPlayers] = useState([]);
@@ -17,15 +17,15 @@ function PlayerForm(props) {
 
     function handleSubmit(event) {
         event.preventDefault();
-        const playersToInsert = players.filter((player) => player !== '');
-        if (playersToInsert.length < 4) {
+        const playerToInsert = players.filter((player) => player !== '');
+        if (playerToInsert.length < 0) {
             toast.error('Please insert at least 4 players!');
             return false;
         }
-        socketPlayers(players, (message) => {
-            console.log(message);
-        });
-        props.history.push('/game');
+        createGameInstance(playerToInsert, (ioResponse) => {
+            console.log(`${ioResponse.message} with id ${ioResponse.gameId}`);
+            props.history.push(`/game/${ioResponse.gameId}`);
+        })
         return true;
     }
 

@@ -27,13 +27,14 @@
     "react-toastify": "5.5.0",
     "socket.io": "2.3.0",
     "socket.io-client": "2.3.0",
-    "uuid": "7.0.3"
+    "uuid": "7.0.3",
+    "npm-run-all": "4.1.5"
   },
   "scripts": {
     "start": "run-p start:dev start:api",
     "start:dev": "cross-env REACT_APP_API_URL=http://localhost:3001 react-scripts start",
     "start:api": "node tools/apiServer.js",
-    "socket": "node tools/server.js",
+    "socket": "node tools/socketServer/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -53,7 +54,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "npm-run-all": "4.1.5"
-  }
+  "devDependencies": {}
 }
