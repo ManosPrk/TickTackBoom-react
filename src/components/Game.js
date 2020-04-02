@@ -7,8 +7,8 @@ import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import PropTypes from 'prop-types'
-
+import { getSocketPlayers } from '../socket_helper/playerSocket';
+import { useEffect } from 'react';
 
 function Game(props) {
     const [cards, setCards] = useState(getCards().slice(0, 2));
@@ -22,11 +22,23 @@ function Game(props) {
     const [gameOver, setGameover] = useState(false);
     const tickAudio = new Audio('/tick.mp3');
     const boomAudio = new Audio('/boom.mp3');
-    const players = props.players;
+    const [players, setPlayers] = useState([]);
+    // const players = props.players;
 
-    if (players.length === 0) {
-        props.history.push('/');
-    }
+    useEffect(() => {
+        let mounted = true;
+        getSocketPlayers((_players) => {
+            if (mounted) {
+                setPlayers(_players);
+            }
+        });
+        return () => mounted = false;
+    }, [])
+
+    // if (players.length === 0) {
+    //     props.history.push('/players');
+    //     toast.error('Please set players before you start a game')
+    // }
 
     function handleCardClick() {
         if (isCardDrawn) {
@@ -59,7 +71,7 @@ function Game(props) {
         if (roundStarted) {
             return;
         }
-        startTimer();
+        startTimer(1);
     }
 
     function hideLoserModal(event) {
@@ -102,7 +114,6 @@ function Game(props) {
         })
     }
 
-
     return (
         <div className="game-container">
             <NavLink to="/">Menu</NavLink>
@@ -117,10 +128,6 @@ function Game(props) {
             </div>
         </div >
     );
-}
-
-Game.propTypes = {
-    players: PropTypes.array.isRequired
 }
 
 export default Game; 
