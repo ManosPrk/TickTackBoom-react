@@ -14,14 +14,14 @@ function LoserModal(props) {
                 <Modal.Title>BOOM! Who lost? </Modal.Title>
             </Modal.Header>
             <div id="loser-list-group">
-                <Modal.Body >
+                <Modal.Body>
                     <ul className="list-group text-center">
                         {props.players
-                            .map((player) => {
+                            .map((player, index) => {
                                 return (
                                     <li
                                         onClick={props.close}
-                                        value={player.id}
+                                        value={index}
                                         key={player.id}
                                         className="list-group-item noselect"
                                     >

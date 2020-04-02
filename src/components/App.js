@@ -1,39 +1,16 @@
-import React, { useState } from 'react';
-import { Route, Switch } from "react-router-dom";
+import React from 'react';
+import { Route, Switch, Redirect } from "react-router-dom";
 // import { ToastContainer } from "react-toastify";
 import "../css/main.css"
 import "react-toastify/dist/ReactToastify.css";
 import MainMenu from './MainMenu';
 import Game from './Game';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import PlayerForm from './PlayerForm';
 import TextInput from './common/TextInput';
-import { socketPlayers } from '../socket_helper/playerSocket'
 
 function App(props) {
-    socketPlayers((players) => console.log(players));
-    const [players, setPlayers] = useState([
 
-    ]);
-
-    function handleBlur(event) {
-        event.preventDefault();
-        const { target } = event;
-        const newPlayers = players;
-        newPlayers[target.id] = { id: target.id, name: target.value, roundsLost: 0 };
-        setPlayers(newPlayers);
-    }
-
-
-    function handleSubmit(event) {
-        event.preventDefault();
-        const playersToInsert = players.filter((player) => player !== '');
-        if (playersToInsert.length < 4) {
-            toast.error('Please insert at least 4 players!');
-            return false;
-        }
-        return true;
-    }
 
     return (
         <div className="container-fluid">
@@ -41,11 +18,12 @@ function App(props) {
             <Switch>
                 <Route path="/" exact component={MainMenu} />
                 <Route
-                    path="/players" render={(props) => <PlayerForm handleSubmit={handleSubmit} handleBlur={handleBlur} {...props} />}
+                    path="/players" exact component={PlayerForm}
                 />
                 <Route
-                    path="/game" render={(props) => <Game players={players} {...props} />}
+                    path="/game/:id" exact component={Game}
                 />
+                <Redirect from="/game" to="/" />
                 <Route path="/inputs" exact component={TextInput} />
             </Switch>
         </div>
