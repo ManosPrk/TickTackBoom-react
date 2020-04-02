@@ -2,8 +2,8 @@ import openSocket from 'socket.io-client';
 const socket = openSocket('http://localhost:1337');
 
 export function socketPlayers(players, cb) {
-    socket.on('players', (message => cb(message)));
-    socket.emit('subscribeToTimer', players);
+    socket.on('addMessage', (message => cb(message)));
+    socket.emit('subscribeToPlayers', players);
 }
 
 export function getSocketPlayers(cb) {

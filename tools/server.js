@@ -1,21 +1,29 @@
 const io = require('socket.io')();
-require('dotenv').config()
+const uuidv4 = require('uuid').v4;
+require('dotenv').config();
 
 let gameId;
 let players;
 
 io.on('connection', (client) => {
     console.log('in connection')
-    client.on('subscribeToTimer', (_players) => {
-        players = _players
-        console.log('players to add', players);
-        client.emit(players, 'players added');
+    client.on('subscribeToPlayers', (_players) => {
+        savePlayers(_players);
+        client.emit('addMessage', 'players added');
     });
 
     client.on('playersArray', () => {
         client.emit('socketPlayers', players);
     })
 });
+
+function savePlayers(_players) {
+    console.log(players);
+    _players.forEach((_player) => {
+        _player.id = uuidv4();
+    })
+    players = _players;
+}
 
 const port = 1337;
 io.listen(port);
