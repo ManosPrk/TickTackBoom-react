@@ -14,18 +14,17 @@ function ResultsModal(props) {
             onHide={() => { }}
         >
             <Modal.Header className='bg-warning justify-content-center'>
-                <Modal.Title>{players[0].name} Lost! </Modal.Title>
+                <Modal.Title>{players[0].find} Lost! </Modal.Title>
             </Modal.Header>
             <div id="loser-list-group">
                 <Modal.Body>
                     <ul className="list-group text-center">
                         {players
-                            .slice(1)
-                            .map((player) => {
+                            .map((player, index) => {
                                 return (
                                     <li
                                         style={{ border: 'none' }}
-                                        value={player.id}
+                                        value={index}
                                         key={player.id}
                                         className="list-group-item noselect"
                                     >

@@ -21,6 +21,7 @@ function LoserModal(props) {
                                 return (
                                     <li
                                         onClick={props.close}
+                                        style={{ border: 'none' }}
                                         value={index}
                                         key={player.id}
                                         className="list-group-item noselect"
