@@ -7,7 +7,7 @@ import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { getSocketPlayers, isInstanceValid } from '../socket_helper/playerSocket';
+import { isInstanceValid, getPlayersByGameId, notifyPlayers } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
 
 function Game(props) {
@@ -26,6 +26,7 @@ function Game(props) {
     const [players, setPlayers] = useState([]);
     // const players = props.players;
 
+
     useEffect(() => {
         let mounted = true;
 
@@ -35,7 +36,7 @@ function Game(props) {
             }
         });
 
-        getSocketPlayers((_players) => {
+        getPlayersByGameId(gameId).then((_players) => {
             if (mounted) {
                 setPlayers(_players);
             }
