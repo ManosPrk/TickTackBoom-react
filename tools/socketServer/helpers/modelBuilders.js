@@ -1,21 +1,21 @@
 const GameInstance = require('../entities/GameInstance');
 const Player = require('../entities/Player');
 
-module.exports = function Builders() {
-    function buildGameInstance(id, playersId) {
-        if (!id || !playersId) {
+module.exports = {
+    buildGameInstance: (id, players) => {
+        if (!id || !players) {
             return {
                 error:
                 {
-                    message: `Could not build game, missing value(s): ${!id ? 'id' : ''} ${!playersId ? 'players' : ''}`,
+                    message: `Could not build game, missing value(s): ${!id ? 'id' : ''} ${!players.length < 1 ? 'players' : ''}`,
                 }
             }
         }
 
-        return new GameInstance(id, [playersId]);
-    }
+        return new GameInstance(id, players);
+    },
 
-    function buildPlayer(id, name, isLeader = false, roundsLost = 0) {
+    buildPlayer: (id, name, isLeader = false, roundsLost = 0) => {
         if (!id || !name) {
             return {
                 error:
@@ -26,10 +26,6 @@ module.exports = function Builders() {
         }
 
         return new Player(id, name, isLeader, roundsLost);
-    }
-    return {
-        buildGameInstance,
-        buildPlayer
     }
 }
 
