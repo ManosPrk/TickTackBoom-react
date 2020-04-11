@@ -9,7 +9,7 @@ const PlayerRepository = {
     },
     addPlayer: player => {
         const newPlayerIndex = players.push(player) - 1;
-        return players[newPlayerIndex].id;
+        return players[newPlayerIndex];
     },
 };
 
