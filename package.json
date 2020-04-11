@@ -32,9 +32,8 @@
   },
   "scripts": {
     "start": "run-p start:dev start:api",
-    "start:dev": "cross-env REACT_APP_API_URL=http://localhost:3001 react-scripts start",
-    "start:api": "node tools/apiServer.js",
-    "socket": "nodemon tools/socketServer/server.js",
+    "start:dev": "cross-env REACT_APP_API_URL=http://192.168.1.8:1337 react-scripts start",
+    "start:api": "node tools/socketServer/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
