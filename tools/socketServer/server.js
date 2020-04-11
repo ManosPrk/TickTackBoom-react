@@ -1,63 +1,106 @@
 const io = require('socket.io')();
 const uuidv4 = require('uuid').v4;
-const { buildGameInstance, buildPlayer } = require('./helpers/modelBuilders')();
+const { getRandomSecs } = require('./Utilities');
+const GameRepository = require('./repository/GameRepository');
+const GameServices = require('./services/GameServices');
 require('dotenv').config();
 
-let gameInstances = [];
-let players = [];
+io.on('connection', (socket) => {
+    console.log(`a new user has connected with id ${socket.id}`)
 
-//TODO create new modal to insert player name and create new game instance
-io.on('connection', (client) => {
-    console.log('in connection')
-    client.on('subscribeToPlayers', (_player) => {
-        savePlayer(_player);
-        client.emit('addMessage', 'player subscribed');
+    socket.on('subscribeToPlayers', (_player) => {
+        GameServices.savePlayer(_player);
+        socket.emit('addMessage', 'player subscribed');
     });
 
-    client.on('createGameInstance', (player) => {
-        const playerId = savePlayer(player, true);
-        const newInstanceIndex = saveGameInstance(uuidv4(), playerId) - 1;
-        const gameId = gameInstances[newInstanceIndex].id;
-        console.log(gameInstances);
-        client.emit('createGameInstanceResponse', {
-            message: 'New game successfully created!',
+    socket.on('createGameInstance', (data, ackCallback) => {
+
+        const player = GameServices.savePlayer(data.name, socket.id, true);
+        //use length of repository as Id for testing purposes
+        const gameId = GameServices.saveGameInstance(uuidv4(), player);
+        ackCallback({
+            successMessage: 'New game successfully created!',
             gameId
         });
-    })
+        socket.join(gameId);
+    });
 
-    client.on('isValidGame', (gameId, ackCallback) => {
-        let isValid = false;
-        if (gameInstances.some((game) => game.id === gameId)) {
-            isValid = true;
-        }
-        console.log(isValid);
+    socket.once('isValidGame', (gameId, ackCallback) => {
+        const isValid = GameServices.isInstanceValid(gameId);
         ackCallback(isValid);
-    })
+    });
 
-    client.on('subcribeToGameInstance', (gameId) => {
+    socket.on('subcribeToGameInstanceNewPlayer', (data, ackCallback) => {
+        const newPlayer = GameServices.savePlayer(data.name, socket.id);
+        const responseObject = GameServices.subscribeToGameInstance(data, newPlayer);
+        console.log(responseObject);
+        console.log(GameRepository.getGameInstances());
+        if (responseObject.errorMessage) {
+            io.in(data.gameId).emit('notifyPlayers', responseObject.errorMessage);
+            ackCallback(responseObject.errorMessage);
+        }
+        socket.join(data.gameId);
+        io.in(data.gameId).emit('notifyPlayers', `${data.name} joined the game!`, responseObject.players);
+        ackCallback(`successfully added ${data.name} to game with id ${data.gameId}`);
+    });
 
-    })
+    socket.on('requestPlayersFromGame', (gameId, ackCallback) => {
+        const players = GameRepository.getPlayersForGame(gameId);
+        ackCallback(players);
+    });
 
-    client.on('playersArray', () => {
-        client.emit('socketPlayers', players);
+    socket.on('requestDiceSide', (gameId, ackCallback) => {
+        const side = GameServices.getRandomItem(gameId, socket.id, 'diceSides');
+        ackCallback({ side });
+        socket.to(gameId).emit('updateDiceSide', { side });
+    });
+
+    socket.on('requestCard', (gameId, ackCallback) => {
+        const card = GameServices.getRandomItem(gameId, socket.id, 'cards');
+        console.log(card);
+        const cardsLeft = GameRepository.getGameInstanceById(gameId).cards.length;
+        ackCallback({ card, cardsLeft });
+        socket.to(gameId).emit('updateCard', { card, cardsLeft });
+    });
+
+    socket.on('start-game', (gameId, playerId, ackCallback) => {
+        let game = GameRepository.getGameInstanceById(gameId);
+        game.playerWithBomb = GameRepository.getPlayerByIdForGame(gameId, playerId);
+        let remainingTime = getRandomSecs();
+        ackCallback('game started!');
+        socket.to(gameId).emit('game-started', 'Let the games begin!');
+        // console.log(remainingTime);
+        setTimeout(() => {
+            // gameEnded = true;
+            game = GameRepository.getGameInstanceById(gameId);
+            console.log(game.playerWithBomb);
+            io.in(gameId).emit('game-ended', `${game.playerWithBomb.name} lost this round!`);
+
+        }, remainingTime * 1000);
+    });
+
+    socket.on('pass-bomb', (gameId, playerId) => {
+
+        let game = GameRepository
+            .getGameInstanceById(gameId)
+        if (playerId === game.playerWithBomb.id) {
+            const players = GameRepository.getPlayersForGame(gameId);
+            let currentIdx = players.findIndex((player) => player.id === game.playerWithBomb.id);
+            currentIdx++;
+            const nextPlayer = currentIdx >= players.length
+                ? players[0]
+                : players[currentIdx];
+            game.playerWithBomb = nextPlayer;
+
+            io.to(`${nextPlayer.id}`).emit('change-player', `${nextPlayer.name}, Its your turn!`);
+
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`user with id ${socket.id} disconnected!`);
     })
 });
-
-function savePlayer(_player, isLeader = false) {
-    const existingPlayer = players.find((player) => player.name === _player.name);
-    if (existingPlayer) {
-        return existingPlayer;
-    }
-    const newPlayerIndex = players.push(buildPlayer(uuidv4(), _player.name, isLeader));
-    const playerId = players[newPlayerIndex].id;
-    return playerId
-}
-
-function saveGameInstance(id, playerId) {
-    return gameInstances.push(buildGameInstance(id, playerId));
-}
-
-
 
 const port = 1337;
 io.listen(port);
