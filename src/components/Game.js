@@ -184,7 +184,7 @@ function Game(props) {
             {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
             <Bomb onClick={handleBombClick}></Bomb>
             <span>Remaining syllables: {cardsLeft} </span>
-            <audio loop="true" ref={tickAudio} src="/tick.mp3" id="tick-audio"></audio>
+            <audio loop={true} ref={tickAudio} src="/tick.mp3" id="tick-audio"></audio>
             <audio ref={boomAudio} src="/boom.mp3" id="bomb-audio"></audio>
             <div className="game-items-container">
                 <Dice text={currentDiceSide} onClick={handleDiceClick}></Dice>
