@@ -46,7 +46,7 @@ function ModalTemplate(props) {
 }
 
 ModalTemplate.propTypes = {
-    modalButtonText: PropTypes.string.isRequired,
+    modalButtonText: PropTypes.string,
     title: PropTypes.string,
     body: PropTypes.node.isRequired,
     handleClick: PropTypes.func

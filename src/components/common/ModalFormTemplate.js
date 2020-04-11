@@ -9,13 +9,10 @@ function ModalFormTemplate(props) {
             modalButtonText={props.modalButtonText}
             body={
                 <FormTemplate
-                    formLabel={props.formLabel}
-                    placeholder={props.formInputPlaceholder}
-                    mutedText={props.handleClose}
                     buttonText={props.formButtonText}
                     handleSubmit={props.formHandleSubmit}
                     handleBlur={props.formInputHandleBlur}
-                    name={props.formInputName}
+                    inputValues={props.formInputValues}
                 />
             }
         />
