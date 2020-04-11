@@ -1,30 +1,45 @@
 import React from "react";
 import Bomb from "./Bomb";
-import { NavLink } from "react-router-dom";
-import ModalTemplate from "./common/ModalTemplate"
-import FormTemplate from "./common/FormTemplate";
-import { toast } from "react-toastify";
-import { createGameInstance } from "../socket_helper/playerSocket";
-import { useState } from "react";
+import { createGameInstance, addPlayerToGame } from "../socket_helper/playerSocket";
 import ModalFormTemplate from "./common/ModalFormTemplate";
+import { toast } from "react-toastify";
 
 function MainMenu(props) {
-    const [formData, setFormData] = useState({
-        name: ''
-    });
 
-    function handleBlur(event) {
-        event.preventDefault();
-        const { target } = event;
-        formData[event.target.name] = target.value;
-    }
+    const newGameInputValues = {
+        name: '',
+    };
+
+    const joinGameInputs = {
+        name: '',
+        gameId: ''
+    };
 
     function handleNewGameSubmit(event) {
         event.preventDefault();
-        createGameInstance(formData, (ioResponse) => {
-            console.log(ioResponse);
-            props.history.push(`/game/${ioResponse.gameId}`);
-        })
+        createGameInstance(newGameInputValues, (ioResponse) => {
+            console.log(ioResponse.errorMessage);
+            if (ioResponse.errorMessage) {
+                toast.error(ioResponse.errorMessage);
+            } else {
+                props.history.push(`/game/${ioResponse.gameId}`);
+            }
+        });
+    }
+
+    function handleJoinGameSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        console.log(form.checkValidity());
+        if (form.checkValidity() === false) {
+            event.stopPropagation();
+            return;
+        }
+
+        addPlayerToGame(joinGameInputs).then((message) => {
+            console.log(message);
+            props.history.push(`game/${joinGameInputs.gameId}`);
+        });
     }
 
     return (
@@ -33,18 +48,24 @@ function MainMenu(props) {
             <div>
                 <nav className="d-flex flex-column col-md-12">
                     <ModalFormTemplate
-                        modalTitle='Enter your name to start a new game!'
+                        modalTitle="Enter your name to start a new game!"
                         modalButtonText="New Game"
-                        formMutedText="we care"
-                        formButtonText="Submit"
+                        formButtonText="Start"
                         formHandleSubmit={handleNewGameSubmit}
-                        formLabel="Name"
-                        formInputPlaceholder="Player..."
-                        formInputHandleBlur={handleBlur}
-                        formInputName={Object.keys(formData)}
+                        // formInputHandleBlur={handleBlur}
+                        formInputValues={newGameInputValues}
+                    />
+
+                    <ModalFormTemplate
+                        modalTitle="Enter your name and game id to join a game!"
+                        modalButtonText="Join Game"
+                        formButtonText="Join"
+                        formHandleSubmit={handleJoinGameSubmit}
+                        // formInputHandleBlur={handleBlur}
+                        formInputValues={joinGameInputs}
                     />
                     <h1>
-                        <NavLink className="nav-button" id="nav-button" to="/join">Join Game</NavLink>
+
                     </h1>
                 </nav>
             </div >
