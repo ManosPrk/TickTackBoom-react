@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-const socket = io.connect('localhost:1337');
+const socket = io.connect('https://ttboom-web-api-server.herokuapp.com/');
 
 export function getSocketId() {
     return socket.id;
