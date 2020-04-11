@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import Bomb from "./Bomb";
 import Dice from "./Dice";
 import Card from "./Card";
-import { getCards, getDiceSide, getRandomSecs } from "../Utilities"
+import { getRandomSecs } from "../Utilities"
 import LoserModal from './common/LoserModal';
 import { NavLink } from 'react-router-dom';
 import ResultsModal from './common/ResultsModal';
 import { toast } from 'react-toastify';
-import { isInstanceValid, getPlayersByGameId, notifyPlayers } from '../socket_helper/playerSocket';
+import { getPlayersByGameId, updatePlayers, getSocketDiceSide, updateDiceSide, getCurrentCard, updateCurrentCard, isInstanceValid, startGame, getSocketId, changePlayer, passBomb, gameEnded, gameStarted } from '../socket_helper/playerSocket';
 import { useEffect } from 'react';
+import { useRef } from 'react';
 
 function Game(props) {
-    const [cards, setCards] = useState(getCards().slice(0, 2));
+    const [cardsLeft, setCardsLeft] = useState();
     const gameId = props.match.params.id;
+    const yourPlayerId = getSocketId();
     const [currentCard, setCurrentCard] = useState('DRAW');
     const [currentDiceSide, setCurrentDiceSide] = useState('ROLL');
     const [isDiceRolled, setIsDiceRolled] = useState(false);
@@ -21,43 +23,82 @@ function Game(props) {
     const [showLoserModal, setShowLoserModal] = useState(false);
     const [showResultsModal, setShowResultsModal] = useState(false);
     const [gameOver, setGameover] = useState(false);
-    const tickAudio = new Audio('/tick.mp3');
-    const boomAudio = new Audio('/boom.mp3');
+    const tickAudio = useRef();
+    const boomAudio = useRef();
     const [players, setPlayers] = useState([]);
-    // const players = props.players;
-
 
     useEffect(() => {
         let mounted = true;
+        if (mounted) {
 
-        isInstanceValid(gameId).then((isValid) => {
-            if (!isValid) {
-                props.history.push('/');
-            }
-        });
+            isInstanceValid(gameId, (isValid) => {
+                if (!isValid) {
+                    props.history.push('/');
+                }
+            });
 
-        getPlayersByGameId(gameId).then((_players) => {
-            if (mounted) {
+            updateCurrentCard((response) => {
+                if (response.errorMessage) {
+                    console.log(response.errorMessage);
+                    return;
+                }
+                setCardsLeft(response.cardsLeft);
+                setCurrentCard(response.card);
+            })
+
+            updateDiceSide((response) => {
+                if (response.error) {
+                    console.log(response.error);
+                    return;
+                }
+                setCurrentDiceSide(response.side);
+            });
+
+            updatePlayers((message, _players) => {
+                toast.success(message);
                 setPlayers(_players);
-            }
-        });
-        return () => mounted = false;
-    }, [gameId, props.history])
+            })
 
-    // if (players.length === 0) {
-    //     props.history.push('/players');
-    //     toast.error('Please set players before you start a game')
-    // }
+            getPlayersByGameId(gameId).then((_players) => {
+                setPlayers(_players);
+            });
+
+            changePlayer((message) => {
+                toast.warn(message);
+                tickAudio.current.play();
+            });
+
+            gameStarted((message) => {
+                toast.info(message);
+                setRoundStarted(true);
+            });
+
+            gameEnded((loserMessage) => {
+                // const loser = players.find((player) => player.id === loser.id);
+                if (!tickAudio.current.paused) {
+                    tickAudio.current.pause();
+                }
+                boomAudio.current.play();
+                toast.info(loserMessage);
+            })
+
+        }
+        return () => mounted = false;
+    }, [gameId])
 
     function handleCardClick() {
         if (isCardDrawn) {
             toast.error('You already drew a card')
             return;
         }
-        const newCardSet = cards;
-        setCurrentCard(newCardSet.shift());
-        setIsCardDrawn(true);
-        setCards(newCardSet);
+        getCurrentCard(gameId, (response) => {
+            if (response.errorMessage) {
+                console.log(response.errorMessage);
+            }
+            setCurrentCard(response.card);
+            setIsCardDrawn(true);
+            setCardsLeft(response.cardsLeft);
+        })
     }
 
     function handleDiceClick() {
@@ -65,29 +106,41 @@ function Game(props) {
             toast.error('You have already rolled the dice')
             return;
         }
-        const randomSide = getDiceSide();
-        setIsDiceRolled(true);
-        setCurrentDiceSide(randomSide);
+        getSocketDiceSide(gameId, (response) => {
+            if (response.errorMessage) {
+                console.log(response.errorMessage);
+            }
+            setIsDiceRolled(true);
+            setCurrentDiceSide(response.side);
+        });
     }
 
+
     function handleBombClick() {
-        const cardError = `${!isCardDrawn ? `draw a card` : ''}`;
-        const diceError = `${!isDiceRolled ? 'roll the dice' : ''}`;
-        if (!isDiceRolled || !isCardDrawn) {
-            toast.error(`Please ${diceError}${!isDiceRolled && !isCardDrawn ? ' and ' : ''}${cardError}.`)
-            return;
+        // const cardError = `${!isCardDrawn ? `draw a card` : ''}`;
+        // const diceError = `${!isDiceRolled ? 'roll the dice' : ''}`;
+        // // if (!isDiceRolled || !isCardDrawn) {
+        // //     toast.error(`Please ${diceError}${!isDiceRolled && !isCardDrawn ? ' and ' : ''}${cardError}.`)
+        // //     return;
+        // // }
+        // if (roundStarted) {
+        //     return;
+        // }
+        const player = players.find((player) => player.id === yourPlayerId);
+        if (player.isLeader && !roundStarted) {
+            startTimer();
         }
-        if (roundStarted) {
-            return;
+        else if (roundStarted) {
+            tickAudio.current.pause();
+            passBomb(gameId, yourPlayerId);
         }
-        startTimer(1);
     }
 
     function hideLoserModal(event) {
         event.preventDefault();
         players[event.target.value].roundsLost++;
         setShowLoserModal(false);
-        if (cards.length === 0) {
+        if (cardsLeft === 0) {
             setShowResultsModal(true);
             setGameover(true);
         }
@@ -106,21 +159,21 @@ function Game(props) {
 
     function resetGame() {
         setGameover(false);
-        setCards(getCards().slice(0, 2));
+        //TODO: RESET CARDS
         players.forEach((player) => { player.roundsLost = 0 });
     }
 
-    function startTimer(randomExplodingTime = getRandomSecs()) {
+    function startTimer() {
         setRoundStarted(true);
-        tickAudio.loop = true;
-        tickAudio.play().then(() => {
-            setTimeout(() => {
-                tickAudio.pause();
-                boomAudio.play();
-                setShowLoserModal(true);
-                resetState();
-            }, randomExplodingTime * 1000);
-        })
+        tickAudio.current.play().then(() => startGame(gameId, yourPlayerId, (message) => toast.info(message)));
+        // tickAudio.play().then(() => {
+        //     setTimeout(() => {
+        //         tickAudio.pause();
+        //         boomAudio.play();
+        //         setShowLoserModal(true);
+        //         resetState();
+        //     }, randomExplodingTime * 1000);
+        // })
     }
 
     return (
@@ -130,7 +183,9 @@ function Game(props) {
             {/* {cards.length === 0 && <ResultsModal show={showResultsModal} close={hideResultsModal} players={[...players]} />} */}
             {gameOver && <ResultsModal show={showResultsModal} newGame={resetGame} close={hideResultsModal} players={[...players]} />}
             <Bomb onClick={handleBombClick}></Bomb>
-            <span>Remaining syllables: {cards.length} </span>
+            <span>Remaining syllables: {cardsLeft} </span>
+            <audio loop="true" ref={tickAudio} src="/tick.mp3" id="tick-audio"></audio>
+            <audio ref={boomAudio} src="/boom.mp3" id="bomb-audio"></audio>
             <div className="game-items-container">
                 <Dice text={currentDiceSide} onClick={handleDiceClick}></Dice>
                 <Card text={currentCard} onClick={handleCardClick}></Card>
