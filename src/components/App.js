@@ -6,18 +6,16 @@ import "react-toastify/dist/ReactToastify.css";
 import MainMenu from './MainMenu';
 import Game from './Game';
 import { ToastContainer } from 'react-toastify';
-import PlayerForm from './PlayerForm';
 import TextInput from './common/TextInput';
-import JoinGameForm from './JoinGameForm';
+import { CookiesProvider } from 'react-cookie';
 
-function App(props) {
+function App() {
     return (
         <div className="container-fluid">
+            <CookiesProvider />
             <ToastContainer newestOnTop autoClose={2000} hideProgressBar />
             <Switch>
                 <Route path="/" exact component={MainMenu} />
-                <Route path="/players" exact component={PlayerForm} />
-                <Route path="/join" exact component={JoinGameForm} />
                 <Route path="/game/:id" exact component={Game} />
                 <Redirect from="/game" to="/" />
                 <Route path="/inputs" exact component={TextInput} />
